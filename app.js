@@ -18,6 +18,7 @@ class Despesa {
     }
 }
 
+
 class Db {
 
     constructor() {
@@ -58,6 +59,7 @@ class Db {
                 continue;
             }
 
+            despesa.id = i;
             despesas.push(despesa);
         }
         return despesas;
@@ -100,6 +102,9 @@ class Db {
         return despesasFiltradas;
     }
 
+    remover(id) {
+        localStorage.removeItem(id);
+    }
 }
 
 
@@ -113,8 +118,6 @@ function cadastrarDespesa() {
     let tipo        = document.getElementById('tipo');
     let descricao   = document.getElementById('descricao');
     let valor       = document.getElementById('valor');
-
-    // console.log(ano.value, mes.value, dia.value, tipo.value, descricao.value, valor.value);
 
     let despesa = new Despesa(
         ano.value, 
@@ -135,6 +138,8 @@ function cadastrarDespesa() {
 
         // Alerta de sucesso
         $('#modalRegistraDespesa').modal('show');
+
+        // Limpando os inputs após inserir dados
         for(let i in despesa) {
             document.getElementById(i).value = '';
         }
@@ -183,6 +188,20 @@ function carregaListaDespesas(despesas = Array(), filter = false) {
         linha.insertCell(1).innerHTML = d.tipo;
         linha.insertCell(2).innerHTML = d.descricao;
         linha.insertCell(3).innerHTML = d.valor;
+
+        // botão excluir despesa
+        let botao = document.createElement("Button");
+        botao.className = 'btn btn-danger';
+        botao.innerHTML = '<i class="fas fa-times"></i>';
+        botao.id = `id_despesa_${d.id}`;
+        botao.onclick = function() {
+            let id = this.id.replace('id_despesa_', '');
+            db.remover(id);
+            window.location.reload();
+        }
+
+        linha.insertCell(4).append(botao);
+        console.log(d);
     })
 }
 
