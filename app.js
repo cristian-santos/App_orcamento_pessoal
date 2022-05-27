@@ -62,6 +62,44 @@ class Db {
         }
         return despesas;
     }
+
+    pesquisar(despesa) {
+        let despesasFiltradas = Array();
+        despesasFiltradas = this.recuperarTodosRegistros();
+        
+        // Ano
+        if(despesa.ano != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.ano == despesa.ano);
+        }
+
+        // Mês
+        if(despesa.mes != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.mes == despesa.mes);
+        }
+
+        // Dia
+        if(despesa.dia != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.dia == despesa.dia);
+        }
+
+        // Tipo
+        if(despesa.tipo != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.tipo == despesa.tipo);
+        }
+
+        // Descrição
+        if(despesa.descricao != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.descricao == despesa.descricao);
+        }
+
+        // Valor
+        if(despesa.valor != '') {
+            despesasFiltradas = despesasFiltradas.filter(d => d.valor == despesa.valor);
+        }
+
+        return despesasFiltradas;
+    }
+
 }
 
 
@@ -97,6 +135,9 @@ function cadastrarDespesa() {
 
         // Alerta de sucesso
         $('#modalRegistraDespesa').modal('show');
+        for(let i in despesa) {
+            document.getElementById(i).value = '';
+        }
     } else {
         document.getElementById('titulo_modal').innerHTML = 'Erro na inclusão do registro!';
         document.getElementById('titulo_modal_div').className = 'modal-header text-danger';
@@ -109,9 +150,55 @@ function cadastrarDespesa() {
     }
 }
 
-function carregaListaDespesas() {
-    let despesas = Array();
-    despesas = db.recuperarTodosRegistros();
+function carregaListaDespesas(despesas = Array(), filter = false) {
+    if(despesas.length == 0 && filter == false) {
+        despesas = db.recuperarTodosRegistros();
+    }
 
-    console.log(despesas);
+    // Selecionamos o tbody
+    let listaDespesas = document.getElementById('listaDespesas');
+    listaDespesas.innerHTML = '';
+    
+    despesas.forEach(function(d){
+
+        // Criando as linhas (tr)
+        let linha = listaDespesas.insertRow();
+
+        // Criar as colunas (td)
+        linha.insertCell(0).innerHTML = `${d.dia}/${d.mes}/${d.ano}`;
+        
+        // exibindo o nome do tipo em vez do id
+        switch(d.tipo) {
+            case '1': d.tipo = 'Alimentação';
+                break;
+            case '2': d.tipo = 'Educação';
+                break;
+            case '3': d.tipo = 'Lazer';
+                break;
+            case '4': d.tipo = 'Saúde';
+                break;
+            case '5': d.tipo = 'Transporte';
+                break;
+        }
+        linha.insertCell(1).innerHTML = d.tipo;
+        linha.insertCell(2).innerHTML = d.descricao;
+        linha.insertCell(3).innerHTML = d.valor;
+    })
+}
+
+
+function pesquisarDespesa() {
+   let ano = document.getElementById('ano').value
+   let mes = document.getElementById('mes').value
+   let dia = document.getElementById('dia').value
+   let tipo = document.getElementById('tipo').value
+   let descricao = document.getElementById('descricao').value
+   let valor = document.getElementById('valor').value
+
+   let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor);
+
+   let despesas = db.pesquisar(despesa);
+
+   carregaListaDespesas(despesas, true);
+
 }
